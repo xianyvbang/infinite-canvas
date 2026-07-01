@@ -34,7 +34,13 @@ export async function fetchPrompts({ keyword = "", tag = [], category = ALL_PROM
     );
     const response = await fetch(`/api/prompts${params.size ? `?${params}` : ""}`);
     if (!response.ok) throw new Error("获取提示词失败");
-    return (await response.json()) as PromptListResponse;
+    const data = (await response.json()) as Partial<PromptListResponse>;
+    return {
+        items: Array.isArray(data.items) ? data.items : [],
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        categories: Array.isArray(data.categories) ? data.categories : [],
+        total: Number(data.total) || 0,
+    };
 }
 
 export function formatPromptDate(value: string) {
