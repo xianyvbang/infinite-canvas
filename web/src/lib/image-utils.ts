@@ -60,3 +60,34 @@ export function dataUrlToFile(image: ReferenceImage) {
     }
     return new File([bytes], image.name || "reference.png", { type: mimeType });
 }
+
+export function dataUrlToJpegFile(image: ReferenceImage) {
+    return new Promise<File>((resolve, reject) => {
+        const element = new Image();
+        element.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = element.naturalWidth || element.width;
+            canvas.height = element.naturalHeight || element.height;
+            const context = canvas.getContext("2d");
+            if (!context) {
+                reject(new Error("图片转换失败"));
+                return;
+            }
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(element, 0, 0);
+            canvas.toBlob(
+                (blob) => (blob ? resolve(new File([blob], jpegFileName(image.name), { type: "image/jpeg" })) : reject(new Error("图片转换失败"))),
+                "image/jpeg",
+                0.95,
+            );
+        };
+        element.onerror = () => reject(new Error("图片转换失败"));
+        element.src = image.dataUrl;
+    });
+}
+
+function jpegFileName(name?: string) {
+    const value = (name || "reference.jpg").trim();
+    return /\.[^.]+$/.test(value) ? value.replace(/\.[^.]+$/, ".jpg") : `${value}.jpg`;
+}

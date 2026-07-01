@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { buildApiUrl, resolveModelRequestConfig, type AiConfig, type ImageResponseFormat, type ModelChannel } from "@/stores/use-config-store";
 import { nanoid } from "nanoid";
-import { dataUrlToFile } from "@/lib/image-utils";
+import { dataUrlToFile, dataUrlToJpegFile } from "@/lib/image-utils";
 import { buildImageReferencePromptText } from "@/lib/image-reference-prompt";
 import { imageToDataUrl } from "@/services/image-storage";
 import type { ReferenceImage } from "@/types/image";
@@ -665,7 +665,7 @@ export async function requestEdit(config: AiConfig, prompt: string, references: 
     if (requestSize) {
         formData.set("size", requestSize);
     }
-    const files = await Promise.all(references.map(async (image) => dataUrlToFile({ ...image, dataUrl: await imageToDataUrl(image) })));
+    const files = await Promise.all(references.map(async (image) => dataUrlToJpegFile({ ...image, dataUrl: await imageToDataUrl(image) })));
     files.forEach((file) => formData.append("image", file));
     if (mask) formData.set("mask", dataUrlToFile(mask));
 
