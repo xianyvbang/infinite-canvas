@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { buildApiUrl, resolveModelRequestConfig, type AiConfig, type ModelChannel } from "@/stores/use-config-store";
+import { buildApiUrl, resolveModelRequestConfig, type AiConfig, type ImageResponseFormat, type ModelChannel } from "@/stores/use-config-store";
 import { nanoid } from "nanoid";
 import { dataUrlToFile } from "@/lib/image-utils";
 import { buildImageReferencePromptText } from "@/lib/image-reference-prompt";
@@ -180,23 +180,19 @@ function resolveRequestSize(quality: string | undefined, size: string) {
     throw new Error("图像尺寸格式不支持，请使用 auto、9:16 或 1024x1024");
 }
 
-function resolveImageDataUrl(item: Record<string, unknown>) {
-    if (typeof item.b64_json === "string" && item.b64_json) {
-        return `data:image/png;base64,${item.b64_json}`;
-    }
-    if (typeof item.url === "string" && item.url) {
-        return item.url;
-    }
-    return null;
+function resolveImageDataUrl(item: Record<string, unknown>, responseFormat: ImageResponseFormat) {
+    const b64Json = typeof item.b64_json === "string" && item.b64_json ? `data:image/png;base64,${item.b64_json}` : null;
+    const url = typeof item.url === "string" && item.url ? item.url : null;
+    return responseFormat === "url" ? url || b64Json : b64Json || url;
 }
 
-function parseImagePayload(payload: ImageApiResponse) {
+function parseImagePayload(payload: ImageApiResponse, responseFormat: ImageResponseFormat) {
     if (typeof payload.code === "number" && payload.code !== 0) {
         throw new Error(payload.msg || "请求失败");
     }
     const images =
         payload.data
-            ?.map(resolveImageDataUrl)
+            ?.map((item) => resolveImageDataUrl(item, responseFormat))
             .filter((value): value is string => Boolean(value))
             .map((dataUrl) => ({ id: nanoid(), dataUrl })) || [];
 
@@ -636,7 +632,7 @@ export async function requestGeneration(config: AiConfig, prompt: string, option
                 signal: options?.signal,
             },
         );
-        const images = parseImagePayload(response.data);
+        const images = parseImagePayload(response.data, requestConfig.imageGenerationResponseFormat);
         return images;
     } catch (error) {
         throw new Error(readAxiosError(error, "请求失败"));
@@ -675,7 +671,7 @@ export async function requestEdit(config: AiConfig, prompt: string, references: 
 
     try {
         const response = await axios.post<ImageApiResponse>(aiApiUrl(requestConfig, "/images/edits"), formData, { headers: aiHeaders(requestConfig), signal: options?.signal });
-        const images = parseImagePayload(response.data);
+        const images = parseImagePayload(response.data, requestConfig.imageEditResponseFormat);
         return images;
     } catch (error) {
         throw new Error(readAxiosError(error, "请求失败"));
