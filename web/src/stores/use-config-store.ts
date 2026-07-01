@@ -6,7 +6,6 @@ import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
 
 export type ApiCallFormat = "openai" | "gemini";
-export type ImageResponseFormat = "b64_json" | "url";
 
 export type ModelChannel = {
     id: string;
@@ -15,8 +14,6 @@ export type ModelChannel = {
     apiKey: string;
     apiFormat: ApiCallFormat;
     models: string[];
-    imageGenerationResponseFormat: ImageResponseFormat;
-    imageEditResponseFormat: ImageResponseFormat;
 };
 
 export type AiConfig = {
@@ -78,8 +75,6 @@ export const defaultConfig: AiConfig = {
             apiKey: "",
             apiFormat: "openai",
             models: ["gpt-image-2", "grok-imagine-video", "gpt-5.5", "gpt-4o-mini-tts"],
-            imageGenerationResponseFormat: "b64_json",
-            imageEditResponseFormat: "url",
         },
     ],
     model: "default::gpt-image-2",
@@ -265,8 +260,6 @@ export function createModelChannel(channel?: Partial<ModelChannel>): ModelChanne
         apiKey: channel?.apiKey || "",
         apiFormat,
         models: uniqueRawModels(channel?.models || []),
-        imageGenerationResponseFormat: normalizeImageResponseFormat(channel?.imageGenerationResponseFormat, "b64_json"),
-        imageEditResponseFormat: normalizeImageResponseFormat(channel?.imageEditResponseFormat, "url"),
     };
 }
 
@@ -326,8 +319,6 @@ export function resolveModelRequestConfig(config: AiConfig, value: string) {
         baseUrl: channel.baseUrl,
         apiKey: channel.apiKey,
         apiFormat: channel.apiFormat,
-        imageGenerationResponseFormat: channel.imageGenerationResponseFormat,
-        imageEditResponseFormat: channel.imageEditResponseFormat,
     };
 }
 
@@ -369,10 +360,6 @@ export function defaultBaseUrlForApiFormat(apiFormat: ApiCallFormat) {
 
 function normalizeApiFormat(apiFormat: unknown): ApiCallFormat {
     return apiFormat === "gemini" ? "gemini" : "openai";
-}
-
-function normalizeImageResponseFormat(format: unknown, fallback: ImageResponseFormat): ImageResponseFormat {
-    return format === "url" || format === "b64_json" ? format : fallback;
 }
 
 function uniqueRawModels(models: string[]) {
