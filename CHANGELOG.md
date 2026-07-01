@@ -2,8 +2,11 @@
 
 ## Unreleased
 
+## v0.4.0.1
+
 + [新增] 渠道兼容Gemini格式。
 + [新增] 新增Codex App插件支持。
++ [新增] 渠道支持分别配置 GPT 图片构建和图片修改的 `response_format`。
 
 ## v0.4.0 - 2026-06-16
 
