@@ -9,7 +9,7 @@ import { fetchChannelModels } from "@/services/api/image";
 import { syncAppDataToWebdav, type AppSyncDomainKey, type AppSyncProgressEvent } from "@/services/app-sync";
 import { testWebdavConnection, WEBDAV_MANIFEST_FILE_NAME } from "@/services/webdav-sync";
 import { audioFormatOptions, audioVoiceOptions, normalizeAudioSpeedValue } from "@/lib/audio-generation";
-import { createModelChannel, defaultBaseUrlForApiFormat, filterModelsByCapability, modelOptionLabel, modelOptionsFromChannels, normalizeModelOptionValue, useConfigStore, type AiConfig, type ApiCallFormat, type ModelCapability, type ModelChannel } from "@/stores/use-config-store";
+import { createModelChannel, defaultBaseUrlForApiFormat, filterModelsByCapability, modelOptionLabel, modelOptionsFromChannels, normalizeModelOptionValue, useConfigStore, type AiConfig, type ApiCallFormat, type ImageResponseFormat, type ModelCapability, type ModelChannel } from "@/stores/use-config-store";
 
 type ModelGroup = {
     capability: ModelCapability;
@@ -37,6 +37,11 @@ const modelGroups: ModelGroup[] = [
 const apiFormatOptions: Array<{ label: string; value: ApiCallFormat }> = [
     { label: "OpenAI", value: "openai" },
     { label: "Gemini", value: "gemini" },
+];
+
+const imageResponseFormatOptions: Array<{ label: string; value: ImageResponseFormat }> = [
+    { label: "b64_json", value: "b64_json" },
+    { label: "url", value: "url" },
 ];
 
 const webdavDomainKeys: AppSyncDomainKey[] = ["canvas", "assets", "image-workbench", "video-workbench"];
@@ -287,6 +292,12 @@ export function AppConfigModal() {
                                                 </Form.Item>
                                                 <Form.Item label="模型列表" className="mb-0 md:col-span-2">
                                                     <Select mode="tags" showSearch allowClear maxTagCount="responsive" placeholder="输入模型名，或点击拉取模型" value={channel.models} onChange={(models) => updateChannel(channel.id, { models })} />
+                                                </Form.Item>
+                                                <Form.Item label="GPT 图片构建 response_format" className="mb-0">
+                                                    <Select value={channel.imageGenerationResponseFormat} options={imageResponseFormatOptions} onChange={(value: ImageResponseFormat) => updateChannel(channel.id, { imageGenerationResponseFormat: value })} />
+                                                </Form.Item>
+                                                <Form.Item label="GPT 图片修改 response_format" className="mb-0">
+                                                    <Select value={channel.imageEditResponseFormat} options={imageResponseFormatOptions} onChange={(value: ImageResponseFormat) => updateChannel(channel.id, { imageEditResponseFormat: value })} />
                                                 </Form.Item>
                                             </div>
                                         </section>
