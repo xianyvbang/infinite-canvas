@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.4.0.2
+
++ [调整] GPT 图片构建和图片修改请求固定使用 `b64_json`，并移除渠道配置中的 `response_format` 下拉项。
+
 ## v0.4.0.1
 
 + [新增] 渠道兼容Gemini格式。
